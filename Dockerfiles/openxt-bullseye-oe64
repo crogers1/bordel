@@ -1,11 +1,11 @@
-FROM multiarch/debian-debootstrap:amd64-bullseye
+FROM debian:bookworm
 MAINTAINER Daniel P. Smith <dpsmith@apertussolutions.com>
 
 ARG UNAME=build
 ARG UID=1000
 ARG GID=1000
 
-RUN sed -i "/bullseye-updates/d" /etc/apt/sources.list
+#RUN sed -i "/bullseye-updates/d" /etc/apt/sources.list
 
 RUN apt-get update && apt-get install -yq \
         openssh-server openssl \
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -yq \
         guilt iasl quilt bin86 \
         bcc libsdl1.2-dev liburi-perl genisoimage policycoreutils unzip vim \
         rpm curl libncurses5-dev libncursesw5 libc6-dev-i386 libelf-dev \
-        xorriso mtools dosfstools libgmp-dev zstd lz4 meld \
+        xorriso mtools dosfstools libgmp-dev zstd lz4 sudo meld \
         file byobu man ca-certificates locales && \
         rm -rf /var/lib/apt-lists/* && \
         echo "dash dash/sh boolean false" | debconf-set-selections && \
@@ -41,6 +41,8 @@ RUN curl http://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/
 RUN ln -s /lib64/ld-linux-x86-64.so.2 /lib/
 
 RUN useradd -Ums /bin/bash -l -p '""' -u $UID $UNAME
+RUN echo "$UNAME:new_pass" | chpasswd
+RUN usermod -aG sudo $UNAME
 
 # Add quilt config files
 ADD root/home/build/.quiltrc /home/build/.quiltrc
